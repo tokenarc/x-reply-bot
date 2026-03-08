@@ -1,29 +1,29 @@
 """
-OCR processor for extracting text from images using Tesseract.
+OCR processor for extracting text from images.
+
+NOTE: OCR functionality has been disabled for Cloudflare Workers compatibility.
+Pillow and pytesseract are not compatible with Cloudflare Workers environment.
+
+For image processing, consider these alternatives:
+1. Use client-side OCR with tesseract.js in the web client
+2. Send images to external OCR API (Google Vision, AWS Textract, etc.)
+3. Ask users to provide tweet text directly instead of screenshots
 """
 
 import logging
-import os
 from pathlib import Path
 from typing import Optional
-
-from PIL import Image
-
-from config.settings import settings
-
-# Configure pytesseract path if specified
-if settings.TESSERACT_PATH:
-    import pytesseract
-
-    pytesseract.pytesseract.pytesseract_cmd = settings.TESSERACT_PATH
-else:
-    import pytesseract
 
 logger = logging.getLogger(__name__)
 
 
 class OCRProcessor:
-    """Process images and extract text using Tesseract OCR."""
+    """
+    OCR processor stub - OCR functionality disabled.
+    
+    This class provides the same interface as the original OCR processor
+    but returns None to indicate OCR is not available.
+    """
 
     # Supported image formats
     SUPPORTED_FORMATS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
@@ -56,77 +56,37 @@ class OCRProcessor:
         Returns:
             True if file is valid, False otherwise
         """
-        try:
-            # Check file exists
-            if not os.path.exists(file_path):
-                logger.error(f"Image file not found: {file_path}")
-                return False
-
-            # Check file size
-            file_size = os.path.getsize(file_path)
-            if file_size > OCRProcessor.MAX_IMAGE_SIZE:
-                logger.error(f"Image file too large: {file_size} bytes")
-                return False
-
-            # Check format
-            if not OCRProcessor.is_supported_format(file_path):
-                logger.error(f"Unsupported image format: {file_path}")
-                return False
-
-            # Try to open and verify it's a valid image
-            with Image.open(file_path) as img:
-                img.verify()
-
-            return True
-
-        except Exception as e:
-            logger.error(f"Image validation failed: {str(e)}")
-            return False
+        logger.warning(
+            "OCR functionality is disabled. Image validation skipped."
+        )
+        return False
 
     @staticmethod
     def extract_text(image_path: str, language: str = "eng") -> Optional[str]:
         """
-        Extract text from image using Tesseract OCR.
+        Extract text from image using OCR.
+
+        NOTE: This method is disabled and always returns None.
+        
+        OCR functionality requires Pillow and pytesseract, which are not
+        compatible with Cloudflare Workers. To process images:
+
+        1. Use client-side OCR with tesseract.js in your web application
+        2. Send images to an external OCR API service
+        3. Ask users to provide tweet text directly instead of screenshots
 
         Args:
             image_path: Path to image file
-            language: Tesseract language code (default: 'eng' for English)
+            language: Language code (default: 'eng' for English)
 
         Returns:
-            Extracted text or None if extraction failed
+            None - OCR is disabled
         """
-        try:
-            # Validate image file
-            if not OCRProcessor.validate_image_file(image_path):
-                return None
-
-            # Open and preprocess image
-            with Image.open(image_path) as img:
-                # Convert to RGB if necessary
-                if img.mode != "RGB":
-                    img = img.convert("RGB")
-
-                # Extract text using Tesseract
-                text = pytesseract.image_to_string(img, lang=language)
-
-                # Clean up extracted text
-                text = OCRProcessor._clean_text(text)
-
-                if text:
-                    logger.info(f"Successfully extracted {len(text)} characters from image")
-                    return text
-                else:
-                    logger.warning("No text found in image")
-                    return None
-
-        except pytesseract.TesseractNotFoundError:
-            logger.error(
-                "Tesseract not installed. Install with: sudo apt-get install tesseract-ocr"
-            )
-            return None
-        except Exception as e:
-            logger.error(f"OCR extraction failed: {str(e)}")
-            return None
+        logger.warning(
+            "OCR extraction requested but OCR is disabled for Cloudflare Workers compatibility. "
+            "Please use alternative methods to extract text from images."
+        )
+        return None
 
     @staticmethod
     def _clean_text(text: str) -> str:
@@ -153,13 +113,13 @@ class OCRProcessor:
     @staticmethod
     def get_language_code(language_name: str) -> str:
         """
-        Get Tesseract language code from language name.
+        Get language code from language name.
 
         Args:
             language_name: Language name (e.g., 'english', 'urdu', 'japanese')
 
         Returns:
-            Tesseract language code
+            Language code
         """
         language_map = {
             "english": "eng",

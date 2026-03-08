@@ -85,7 +85,6 @@ I help you generate creative replies for Twitter/X posts. Here's what I can do:
 
 🔄 **Generate Replies** - Send me:
   • A tweet link (twitter.com/user/status/...)
-  • A screenshot of a tweet
   • Plain text of a tweet
 
 🎨 **Customize Style** - Choose from:
@@ -123,17 +122,18 @@ Use /reply to get started!"""
 
 **How to use:**
 1. Send /reply
-2. Provide tweet (link, screenshot, or text)
+2. Provide tweet (link or text)
 3. Choose reply style
 4. Select reply length
 5. Pick language
 6. Review and post generated replies
 
 **Tips:**
-• For best results, use clear tweet screenshots
+• Share Twitter/X links or paste tweet text directly
 • Custom word count must be between 10-280
 • Each reply is limited to 280 characters for Twitter/X
-• You can generate multiple reply options at once"""
+• You can generate multiple reply options at once
+• Image processing (OCR) is disabled for Cloudflare Workers compatibility"""
 
         await update.message.reply_text(help_text)
 
@@ -145,7 +145,6 @@ Use /reply to get started!"""
             "📝 **Send me a tweet to reply to:**\n\n"
             "You can send:\n"
             "• A Twitter/X link\n"
-            "• A screenshot of the tweet\n"
             "• The tweet text directly",
             parse_mode=ParseMode.MARKDOWN,
         )
@@ -246,32 +245,19 @@ Use /reply to get started!"""
         try:
             await update.message.reply_chat_action(ChatAction.TYPING)
 
-            # Download image from Telegram
-            photo_file = await update.message.photo[-1].get_file()
-            image_path = os.path.join(self.temp_dir, "tweet_screenshot.jpg")
-
-            await photo_file.download_to_drive(image_path)
-
-            # Extract text using OCR
-            extracted_text = OCRProcessor.extract_text(image_path)
-
-            if not extracted_text:
-                await update.message.reply_text(
-                    ERROR_MESSAGES["ocr_failed"], parse_mode=ParseMode.MARKDOWN
-                )
-                return WAITING_FOR_INPUT
-
-            self.current_tweet_text = extracted_text
-            self.current_tweet_id = None
-
+            # OCR functionality is disabled for Cloudflare Workers compatibility
+            # Inform user to provide text directly instead
             await update.message.reply_text(
-                f"✅ {SUCCESS_MESSAGES['text_extracted']}\n\n"
-                f"Extracted: \"{truncate_text(extracted_text, 200)}\"\n\n"
-                "Now let's choose a style for the reply.",
+                "📝 **Image Processing Disabled**\n\n"
+                "OCR (text extraction from images) is currently disabled for Cloudflare Workers compatibility.\n\n"
+                "Please provide the tweet text in one of these ways:\n"
+                "1️⃣ Share a Twitter/X link (e.g., twitter.com/user/status/...)\n"
+                "2️⃣ Copy and paste the tweet text directly\n\n"
+                "This allows the bot to work seamlessly on Cloudflare Workers. "
+                "If you need OCR support, consider using external OCR APIs like Google Vision or AWS Textract.",
                 parse_mode=ParseMode.MARKDOWN,
             )
-
-            return await self._show_style_options(update, context)
+            return WAITING_FOR_INPUT
 
         except Exception as e:
             logger.error(f"Error processing image: {str(e)}")
