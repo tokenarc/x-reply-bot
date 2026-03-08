@@ -10,9 +10,6 @@ compatibility_date = "2024-03-05"
 [observability]
 enabled = true
 
-[limits]
-cpu_ms = 50
-
 [env.production]
 name = "arcreply1-prod"
 vars = { ENVIRONMENT = "production", LOG_LEVEL = "info" }
