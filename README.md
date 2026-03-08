@@ -15,9 +15,14 @@ ARC-Reply is a powerful framework for building serverless applications. Designed
 3. Deploy to Cloudflare Workers as per the deployment guide
 
 ## Technology Stack
-- JavaScript
-- Cloudflare Workers
-- Other serverless architectures
+- Node.js (Cloudflare Workers runtime)
+- Telegram Bot API
+- Groq API for LLM-powered replies
+- Zod for schema validation
+- Axios for HTTP requests
+
+## Migration Note
+The project has been migrated from Python to Node.js to better support Cloudflare Workers. Python-only dependencies have been removed, and the core logic now resides in `index.js`.
 
 ## Contribution Guidelines
 Please refer to the CONTRIBUTING.md file for more details on how to contribute to this project.
