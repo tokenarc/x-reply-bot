@@ -134,6 +134,43 @@ export default {
       }
     }
 
+    // Debug endpoint to test Groq API
+    if (url.pathname === '/debug' && request.method === 'GET') {
+      try {
+        const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${env.GROQ_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'llama3-8b-8192',
+            messages: [
+              { role: 'user', content: 'Say hello in one word' }
+            ],
+          }),
+        });
+
+        const data = await groqResponse.json();
+        return new Response(JSON.stringify({
+          groq_status: groqResponse.status,
+          groq_ok: groqResponse.ok,
+          response: data
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (error) {
+        return new Response(JSON.stringify({
+          groq_status: 'failed',
+          error: error.message
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
     // 404 for unknown routes
     return new Response(JSON.stringify({ error: 'Not Found' }), {
       status: 404,
